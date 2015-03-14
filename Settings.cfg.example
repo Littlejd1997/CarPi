@@ -1,4 +1,4 @@
 [Spotify]
 username = SpotifyUserName
 password = SpotifyPassword
-
+apikey = FileLocationToSpotifyAPIKey

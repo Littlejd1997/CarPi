@@ -1,3 +1,4 @@
+#Copyright 2015 Jonathan Schober Jr
 #!/usr/bin/env python
 from __future__ import unicode_literals
 import sys
@@ -38,7 +39,7 @@ def realInit():
 	global session
 # Assuming a spotify_appkey.key in the current dir
 	config = spotify.Config();
-	config.load_application_key_file(filename='/root/spotify_appkey.key')
+	config.load_application_key_file(filename=Config.get('Spotify','apikey'))
 	session = spotify.Session(config)
 	loop = spotify.EventLoop(session)
 	loop.start()

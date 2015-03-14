@@ -1,4 +1,4 @@
-
+#Copyright 2015 Jonathan Schober Jr
 #!/usr/bin/env python
 #
 # Audio 2 channel volume analyser using MCP2307

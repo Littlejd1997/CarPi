@@ -1,8 +1,9 @@
+#Copyright 2015 Jonathan Schober Jr
 # -*- coding: utf-8 -*-
 from flask import Flask,request, render_template
 import CarPi
 import datetime
-import sp
+import CarSpotify
 import RPi.GPIO as GPIO
 import json
 app = Flask(__name__)
