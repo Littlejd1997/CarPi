@@ -1,0 +1,3 @@
+[submodule "ArduinoCarPi"]
+	path = ArduinoCarPi
+	url = git@github.com:Littlejd1997/ArduinoCarPi.git
