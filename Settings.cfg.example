@@ -2,3 +2,7 @@
 username = SpotifyUserName
 password = SpotifyPassword
 apikey = FileLocationToSpotifyAPIKey
+
+[Arduino]
+Arduino = True
+Arduino_port = /dev/ttyACM0

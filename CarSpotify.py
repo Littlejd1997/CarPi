@@ -5,7 +5,7 @@ import sys
 import threading
 import spotify
 from time import sleep
-import lightnew
+import CarPi
 import ConfigParser
 Config = ConfigParser.ConfigParser()
 Config.read('Settings.cfg')
@@ -22,9 +22,9 @@ def deliverMusic(session, format,data,num_frames):
 	global setup
 	if setup is False:
 		print format
-		lightnew.setup(num_frames,format.channels,format.sample_rate)
+		CarPi.setup(num_frames,format.channels,format.sample_rate)
 		setup = True
-	lightnew.processData(data)
+	CarPi.processData(data)
 	return num_frames
 
 session = None

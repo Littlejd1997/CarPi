@@ -6,28 +6,36 @@
 # Audio from wav file on SD card
 #
 import alsaaudio as aa
+import ConfigParser
 import audioop
 from time import sleep
 import struct
 import wave
 import sys
+from ArduinoCarPi import ArduinoCarPi
 from random import randint
 import  RPi.GPIO as GPIO
 import thread
-
-GREEN = 21
-RED = 20
-BLUE = 4
+Config = ConfigParser.ConfigParser()
+Config.read('Settings.cfg')
+ARDUINO = bool(Config.get('Arduino','Arduino'))
+GREEN = 9
+RED = 10
+BLUE = 11
 leds = []
 colors = [[255,62,150],[139,71,137],[139,102,139],[139,0,139],[138,43,226],[105,89,205],[39,64,250],[112,128,144],[30,144,255],[0,191,255],[0,197,205],[151,255,255],[0,205,102],[124,252,0],[255,255,0],[255,185,15],[238,154,0],[139,69,19],[188,143,143],[128,50,50]]
 currentColor = 0
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(GREEN,GPIO.OUT)
-GPIO.setup(RED, GPIO.OUT)
-GPIO.setup(BLUE, GPIO.OUT)
-r = GPIO.PWM(RED,60)
-g = GPIO.PWM(GREEN,60)
-b = GPIO.PWM(BLUE,60)
+if ARDUINO:
+ arduino = ArduinoCarPi.Arduino(Config.get('Arduino','Arduino_port'))
+ arduino.registerLEDs(RED,GREEN,BLUE)
+else:
+ GPIO.setmode(GPIO.BCM)
+ GPIO.setup(GREEN,GPIO.OUT)
+ GPIO.setup(RED, GPIO.OUT)
+ GPIO.setup(BLUE, GPIO.OUT)
+ r = GPIO.PWM(RED,60)
+ g = GPIO.PWM(GREEN,60)
+ b = GPIO.PWM(BLUE,60)
 brightness = 1.0
 previous = 60
 current = 1
@@ -41,7 +49,7 @@ def lightLED(amplitude):
 		#print '\033[93m' + "WARNING, amplitude: " + str(amplitude)
 		amplitude = 1000
 	if amplitude > previous+80:
-		changeColor()
+		changeColor(amplitude)
 #		print("Higher:", amplitude-previous)
 #		if current == 1:
 #			new = 0;
@@ -127,10 +135,17 @@ def processData(data):
 
 
 def lightRGB(red,green,blue):
-	r.start(red * brightness)
-	g.start(green * brightness)
-	b.start(blue * brightness)
-def changeColor():
+	red = red*0.25
+	green = green*0.25
+	blue = blue*0.25
+	if ARDUINO:
+		arduino.lightRGB(red * brightness,green * brightness,blue * brightness);
+	else:
+		r.start(red * brightness)
+		g.start(green * brightness)
+		b.start(blue * brightness)
+	
+def changeColor(amplitude):
 	global colors
 	global currentColor
 	#if currentColor == (len(colors)-1):
@@ -139,7 +154,8 @@ def changeColor():
 #		currentColor += 1
         currentColor = randint(0,len(colors)-1)
 	color = colors[currentColor]
-	lightRGB((color[0]/255.0)*100,(color[1]/255.0)*100,(color[2]/255.0)*100)
+	print amplitude
+	lightRGB((color[0]/255.0)*amplitude,(color[1]/255.0)*amplitude,(color[2]/255.0)*amplitude)
 def stopMusic():
 	global stop
 	stop = True

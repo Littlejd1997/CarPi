@@ -7,11 +7,11 @@ import CarSpotify
 import RPi.GPIO as GPIO
 import json
 app = Flask(__name__)
-sp.init()
+CarSpotify.init()
 @app.route("/")
 def hello():
 	table = ""
-	for color in lightnew.colors:
+	for color in CarPi.colors:
 		r = format(color[0],'x')
 		g = format(color[1],'x')
 		b = format(color[2],'x')
@@ -31,28 +31,28 @@ def hello():
 	return render_template('gpioweb.html', **templateData)
 @app.route("/resume")
 def resume():
-	sp.session.player.play(play=True)
+	CarSpotify.session.player.play(play=True)
         return ""
 @app.route("/pause")
 def pause():
-	sp.session.player.play(play=False)
+	CarSpotify.session.player.play(play=False)
 	return ""
 @app.route("/currentBrightness")
 def getBrightness():
-	return str(lightnew.brightness)
+	return str(CarPi.brightness)
 
 @app.route("/setBrightness")
 def setBrightness():
-	lightnew.brightness = float(request.args["brightness"])
+	CarPi.brightness = float(request.args["brightness"])
 	return "";
 @app.route("/RGB")
 def LightRGB():
-	lightnew.lightRGB(float(request.args["red"]),float(request.args["green"]),float(request.args["blue"]));
+	CarPi.lightRGB(float(request.args["red"]),float(request.args["green"]),float(request.args["blue"]));
 	return "";
 @app.route("/search")
 def search():
 #	print request.args["query"];
-	search = sp.session.search(request.args["query"])
+	search = CarSpotify.session.search(request.args["query"])
 	search.load()
 	tracks = []
 	for t in search.tracks:
@@ -63,7 +63,7 @@ def search():
 	return json.dumps(tracks)	
 @app.route("/playlists")
 def findPlaylists():
-	playlistcontainer = sp.session.playlist_container;
+	playlistcontainer = CarSpotify.session.playlist_container;
 	playlists = []
 	for play in playlistcontainer:
 		try:
@@ -73,7 +73,7 @@ def findPlaylists():
 	return json.dumps(playlists)
 @app.route("/playlistTracks")
 def tracksForPlaylist():
-	playlist = sp.session.get_playlist(request.args["link"])
+	playlist = CarSpotify.session.get_playlist(request.args["link"])
 	tracks = []
         for t in playlist.tracks:
                 try:
@@ -84,8 +84,8 @@ def tracksForPlaylist():
 @app.route("/playTrack")
 def playTrack():
 	app.logger.error(request.args);
-	track = sp.session.get_track(request.args["track_uri"]).load()
-	sp.playTrack(track)
+	track = CarSpotify.session.get_track(request.args["track_uri"]).load()
+	CarSpotify.playTrack(track)
 	return "Playing "+track.name + " By " + track.artists[0].name
 if __name__ == "__main__":
    app.run(host='0.0.0.0', port=85, debug=True)
