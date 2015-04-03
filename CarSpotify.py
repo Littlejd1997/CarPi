@@ -45,7 +45,7 @@ def realInit():
 	loop.start()
 	session.on(spotify.SessionEvent.MUSIC_DELIVERY, deliverMusic)
 
-	session.login(Config.get('Spotify','username'),Config.get('Spotify','password'))
+	session.login(Config.get('Spotify','username'),Config.get('Spotify','password'), remember_me=True)
 	session.preferred_bitrate(spotify.Bitrate.BITRATE_96k)
 
 def playTrack(track):

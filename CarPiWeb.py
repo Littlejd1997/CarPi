@@ -1,11 +1,15 @@
 #Copyright 2015 Jonathan Schober Jr
 # -*- coding: utf-8 -*-
+import ssl
 from flask import Flask,request, render_template
+from time import sleep
 import CarPi
 import datetime
 import CarSpotify
 import RPi.GPIO as GPIO
 import json
+#ctx = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+#ctx.load_cert_chain("SSLkey.crt","SSLkey.key")
 app = Flask(__name__)
 CarSpotify.init()
 @app.route("/")
@@ -17,8 +21,8 @@ def hello():
 		b = format(color[2],'x')
 		if len(r) == 1:
 			r = "0"+r
-                if len(g) == 1:
-                        g = "0"+g
+		if len(g) == 1:
+			g = "0"+g
                 if len(b) == 1:
                         b = "0"+b
 		color
@@ -51,6 +55,7 @@ def LightRGB():
 	return "";
 @app.route("/search")
 def search():
+	#relogin()
 #	print request.args["query"];
 	search = CarSpotify.session.search(request.args["query"])
 	search.load()
@@ -73,6 +78,7 @@ def findPlaylists():
 	return json.dumps(playlists)
 @app.route("/playlistTracks")
 def tracksForPlaylist():
+	#relogin()
 	playlist = CarSpotify.session.get_playlist(request.args["link"])
 	tracks = []
         for t in playlist.tracks:
@@ -83,9 +89,14 @@ def tracksForPlaylist():
         return json.dumps(tracks)
 @app.route("/playTrack")
 def playTrack():
+	#sleep(10)
 	app.logger.error(request.args);
 	track = CarSpotify.session.get_track(request.args["track_uri"]).load()
 	CarSpotify.playTrack(track)
 	return "Playing "+track.name + " By " + track.artists[0].name
+#def relogin():
+#	if CarSpotify.session.connection.state != CarSpotify.spotify.ConnectionState.LOGGED_IN:
+		#CarSpotify.session.relogin()
 if __name__ == "__main__":
    app.run(host='0.0.0.0', port=85, debug=True)
+#, ssl_context=ctx)

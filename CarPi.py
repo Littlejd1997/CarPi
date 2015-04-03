@@ -18,16 +18,18 @@ import  RPi.GPIO as GPIO
 import thread
 Config = ConfigParser.ConfigParser()
 Config.read('Settings.cfg')
-ARDUINO = bool(Config.get('Arduino','Arduino'))
+ARDUINO = Config.get('Arduino','Arduino') == "True"
+print(Config.get('Arduino','Arduino'))
 GREEN = 9
 RED = 10
 BLUE = 11
 leds = []
-colors = [[255,62,150],[139,71,137],[139,102,139],[139,0,139],[138,43,226],[105,89,205],[39,64,250],[112,128,144],[30,144,255],[0,191,255],[0,197,205],[151,255,255],[0,205,102],[124,252,0],[255,255,0],[255,185,15],[238,154,0],[139,69,19],[188,143,143],[128,50,50]]
+colors = [[255,62,150],[255,175,250],[255,175,255],[255,0,255],[150,50,255],[115,100,255],[39,64,250],[200,225,255],[30,144,255],[0,191,255],[0,200,255],[151,255,255],[0,255,120],[124,252,0],[255,255,0],[255,185,15],[238,154,0],[255,100,80],[255,180,180],[255,100,100]]
 currentColor = 0
-if ARDUINO:
- arduino = ArduinoCarPi.Arduino(Config.get('Arduino','Arduino_port'))
- arduino.registerLEDs(RED,GREEN,BLUE)
+if ARDUINO is True:
+	print(ARDUINO)
+	arduino = ArduinoCarPi.Arduino(Config.get('Arduino','Arduino_port'))
+	arduino.registerLEDs(RED,GREEN,BLUE)
 else:
  GPIO.setmode(GPIO.BCM)
  GPIO.setup(GREEN,GPIO.OUT)
@@ -66,6 +68,8 @@ def lightLED(amplitude):
 #		print("Amplitude: ",amplitude);
 #		leds[0].start(float((amplitude/10) * brightness));
 #		leds[1].start(float((amplitude/10) * brightness))
+	color = colors[currentColor]
+	lightRGB((color[0]/255.0)*amplitude,(color[1]/255.0)*amplitude,(color[2]/255.0)*amplitude)
 	previous = amplitude
 	
 def fadeLED(led,led2, currentLight):
@@ -135,12 +139,15 @@ def processData(data):
 
 
 def lightRGB(red,green,blue):
-	red = red*0.25
-	green = green*0.25
-	blue = blue*0.25
 	if ARDUINO:
+		red = red*0.25
+		green = green*0.25
+		blue = blue*0.25
 		arduino.lightRGB(red * brightness,green * brightness,blue * brightness);
 	else:
+		red = red * 0.1;
+		green = green * 0.1;
+		blue = blue * 0.1;
 		r.start(red * brightness)
 		g.start(green * brightness)
 		b.start(blue * brightness)
