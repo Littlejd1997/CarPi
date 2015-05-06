@@ -20,12 +20,12 @@ Config = ConfigParser.ConfigParser()
 Config.read('Settings.cfg')
 ARDUINO = Config.get('Arduino','Arduino') == "True"
 print(Config.get('Arduino','Arduino'))
-GREEN = 9
-RED = 10
+RED = 9
+GREEN = 10
 BLUE = 11
 leds = []
-colors = [[255,62,150],[255,175,250],[255,175,255],[255,0,255],[150,50,255],[115,100,255],[39,64,250],[200,225,255],[30,144,255],[0,191,255],[0,200,255],[151,255,255],[0,255,120],[124,252,0],[255,255,0],[255,185,15],[238,154,0],[255,100,80],[255,180,180],[255,100,100]]
-currentColor = 0
+#colors = [[127,255,0],[127,255,212],[255,62,150],[255,175,250],[255,175,255],[255,0,255],[150,50,255],[115,100,255],[39,64,250],[200,225,255],[30,144,255],[0,191,255],[0,200,255],[151,255,255],[0,255,120],[124,252,0],[255,255,0],[255,185,15],[238,154,0],[255,100,80],[255,180,180],[255,100,100]]
+currentColor = [0,0,0]
 if ARDUINO is True:
 	print(ARDUINO)
 	arduino = ArduinoCarPi.Arduino(Config.get('Arduino','Arduino_port'))
@@ -68,7 +68,7 @@ def lightLED(amplitude):
 #		print("Amplitude: ",amplitude);
 #		leds[0].start(float((amplitude/10) * brightness));
 #		leds[1].start(float((amplitude/10) * brightness))
-	color = colors[currentColor]
+	color = currentColor
 	lightRGB((color[0]/255.0)*amplitude,(color[1]/255.0)*amplitude,(color[2]/255.0)*amplitude)
 	previous = amplitude
 	
@@ -153,15 +153,28 @@ def lightRGB(red,green,blue):
 		b.start(blue * brightness)
 	
 def changeColor(amplitude):
+	global arduino
 	global colors
 	global currentColor
+	arduino.registerLEDs(RED,GREEN,BLUE);
 	#if currentColor == (len(colors)-1):
 	#	currentColor = 0
 #	else:
 #		currentColor += 1
-        currentColor = randint(0,len(colors)-1)
-	color = colors[currentColor]
-	print amplitude
+        #currentColor = randint(0,len(colors)-1)
+	#color = colors[currentColor]
+	color = [randint(0,255),randint(0,255),randint(0,255)]
+	color[randint(0,2)] = 255
+#	for pixel in color:
+#		if pixel == 0:
+#			pixel = randint(0,255);
+	if color[0] > 128:
+		while (color[1] + color[2]) < 128:
+			color[1] = randint(0,255)
+			color[2] = randint(0,255)
+
+	currentColor = color
+	print color
 	lightRGB((color[0]/255.0)*amplitude,(color[1]/255.0)*amplitude,(color[2]/255.0)*amplitude)
 def stopMusic():
 	global stop

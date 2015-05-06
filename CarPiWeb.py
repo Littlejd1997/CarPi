@@ -8,8 +8,9 @@ import datetime
 import CarSpotify
 import RPi.GPIO as GPIO
 import json
-#ctx = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-#ctx.load_cert_chain("SSLkey.crt","SSLkey.key")
+ctx = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+#ctx.load_cert_chain("ssl.crt","ssl.key")
+ctx.load_cert_chain("mycert1.cer","mycert1.key")
 app = Flask(__name__)
 CarSpotify.init()
 @app.route("/")
@@ -83,9 +84,9 @@ def tracksForPlaylist():
 	tracks = []
         for t in playlist.tracks:
                 try:
-                        tracks.append({"Name":str(t.name),"artist":str(t.artists[0].name),"link":str(t.link)})
+              	   tracks.append({"Name":str(t.name),"artist":str(t.artists[0].name),"link":str(t.link)})
                 except:
-                        app.logger.error('an error occurrend, wonder why');
+                   app.logger.error('an error occurrend, wonder why');
         return json.dumps(tracks)
 @app.route("/playTrack")
 def playTrack():
@@ -98,5 +99,4 @@ def playTrack():
 #	if CarSpotify.session.connection.state != CarSpotify.spotify.ConnectionState.LOGGED_IN:
 		#CarSpotify.session.relogin()
 if __name__ == "__main__":
-   app.run(host='0.0.0.0', port=85, debug=True)
-#, ssl_context=ctx)
+   app.run(host='0.0.0.0', port=443, debug=True, ssl_context=ctx)
