@@ -4,6 +4,7 @@ import ssl
 from flask import Flask,request, render_template
 from time import sleep
 import CarPi
+import random
 import datetime
 import CarSpotify
 import RPi.GPIO as GPIO
@@ -88,6 +89,18 @@ def tracksForPlaylist():
                 except:
                    app.logger.error('an error occurrend, wonder why');
         return json.dumps(tracks)
+        
+@app.route("/randomTrack"):
+def randomRPITrack:
+	playlistcontainer = CarSpotify.session.playlist_container;
+	RPI = None;
+	for playlist in playlistcontainer:
+		if "RPI-Download" in playlist.name:
+			RPI = playlist
+			break;
+	track = random.choice(RPI.tracks)
+	playTrack(track)
+	
 @app.route("/playTrack")
 def playTrack():
 	#sleep(10)
