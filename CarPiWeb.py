@@ -91,17 +91,23 @@ def tracksForPlaylist():
         return json.dumps(tracks)
         
 @app.route("/randomTrack")
-def randomRPITrack:
+def randomRPITrack():
 	playlistcontainer = CarSpotify.session.playlist_container;
 	RPI = None;
 	for playlist in playlistcontainer:
-		if "RPI-Download" in playlist.name:
+		if "RPi-Download" in playlist.name:
 			RPI = playlist
 			break;
 	track = random.choice(RPI.tracks)
-	return playTrack(track)
-	
-	
+	CarSpotify.playTrack(track)
+	return "Playing "+track.name + " By " + track.artists[0].name	
+@app.route("/playTitle")
+def playTitle():
+	search = CarSpotify.session.search(request.args["query"])
+        search.load()
+	track = search.tracks[0];
+	CarSpotify.playTrack(track)
+        return "Playing "+track.name + " By " + track.artists[0].name
 @app.route("/playTrack")
 def playTrack():
 	#sleep(10)
