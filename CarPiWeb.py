@@ -90,7 +90,7 @@ def tracksForPlaylist():
                    app.logger.error('an error occurrend, wonder why');
         return json.dumps(tracks)
         
-@app.route("/randomTrack"):
+@app.route("/randomTrack")
 def randomRPITrack:
 	playlistcontainer = CarSpotify.session.playlist_container;
 	RPI = None;
@@ -99,7 +99,8 @@ def randomRPITrack:
 			RPI = playlist
 			break;
 	track = random.choice(RPI.tracks)
-	playTrack(track)
+	return playTrack(track)
+	
 	
 @app.route("/playTrack")
 def playTrack():
