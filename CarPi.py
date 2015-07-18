@@ -16,6 +16,11 @@ from ArduinoCarPi import ArduinoCarPi
 from random import randint
 import  RPi.GPIO as GPIO
 import thread
+import ao
+from ao import AudioDevice
+from threading import Thread
+dev = AudioDevice(4,bits=16,rate=44100,channels=2)
+
 Config = ConfigParser.ConfigParser()
 Config.read('Settings.cfg')
 ARDUINO = Config.get('Arduino','Arduino') == "True"
@@ -124,18 +129,7 @@ def start(song):
 		processData(data)
 		data = wavfile.readframes(chunk)
 
-def processData(data):
-	global output
-	output.write(data)
-        # Split channel data and find maximum volume
-	channel_l=audioop.tomono(data, 2, 1.0, 0.0)
-	channel_r=audioop.tomono(data, 2, 0.0, 1.0)
- 	max_vol_factor =32.5
-	max_l = audioop.max(channel_l,2)/max_vol_factor
-	max_r = audioop.max(channel_r,2)/max_vol_factor
-#    print("L:",max_l);
-#    print("R:",max_r);
-	lightLED((max_l + max_r)/2)
+
 
 
 def lightRGB(red,green,blue):
@@ -179,4 +173,35 @@ def changeColor(amplitude):
 def stopMusic():
 	global stop
 	stop = True
+
+def processData(data):
+        channel_l=audioop.tomono(data, 2, 1.0, 0.0)
+        channel_r=audioop.tomono(data, 2, 0.0, 1.0)
+        max_vol_factor =32.5
+        max_l = audioop.max(channel_l,2)/max_vol_factor
+        max_r = audioop.max(channel_r,2)/max_vol_factor
+        vol = int((max_l + max_r)/2)
+        if vol == 0:
+                return
+        dev.play(data)
+	lightLED(vol)
+
+def loopAirPlay():
+        f = open(Config.get('AirPlay','AirPlayPipe'))
+        while (True):
+                data = f.read(1600)
+                if (data == ""):
+                        print data
+                        print "null"
+                        f.close()
+                        Thread(target = loopAirPlay).start()
+                        break
+                t = Thread(target = processData, args = (data,))
+                t.daemon = True
+                t.start()
+t = Thread(target = loopAirPlay)
+t.daemon = True
+t.start()
+while (True):
+        sleep(0.1)
 
