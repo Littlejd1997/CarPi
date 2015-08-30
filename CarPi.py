@@ -5,7 +5,7 @@
 #
 # Audio from wav file on SD card
 #
-import alsaaudio as aa
+#import alsaaudio as aa
 import ConfigParser
 import audioop
 from time import sleep
@@ -16,15 +16,15 @@ from ArduinoCarPi import ArduinoCarPi
 from random import randint
 import  RPi.GPIO as GPIO
 import thread
-import ao
-from ao import AudioDevice
+#import ao
+#from ao import AudioDevice
 from threading import Thread
-dev = AudioDevice(4,bits=16,rate=44100,channels=2)
+#dev = AudioDevice(4,bits=16,rate=44100,channels=2)
 
 Config = ConfigParser.ConfigParser()
 Config.read('Settings.cfg')
 ARDUINO = Config.get('Arduino','Arduino') == "True"
-print(Config.get('Arduino','Arduino'))
+#print(Config.get('Arduino','Arduino'))
 RED = 9
 GREEN = 10
 BLUE = 11
@@ -32,7 +32,7 @@ leds = []
 #colors = [[127,255,0],[127,255,212],[255,62,150],[255,175,250],[255,175,255],[255,0,255],[150,50,255],[115,100,255],[39,64,250],[200,225,255],[30,144,255],[0,191,255],[0,200,255],[151,255,255],[0,255,120],[124,252,0],[255,255,0],[255,185,15],[238,154,0],[255,100,80],[255,180,180],[255,100,100]]
 currentColor = [0,0,0]
 if ARDUINO is True:
-	print(ARDUINO)
+	#print(ARDUINO)
 	arduino = ArduinoCarPi.Arduino(Config.get('Arduino','Arduino_port'))
 	arduino.registerLEDs(RED,GREEN,BLUE)
 else:
@@ -55,7 +55,7 @@ def lightLED(amplitude):
 	if amplitude >1000 :
 		#print '\033[93m' + "WARNING, amplitude: " + str(amplitude)
 		amplitude = 1000
-	if amplitude > previous+80:
+	if amplitude > previous+25:
 		changeColor(amplitude)
 #		print("Higher:", amplitude-previous)
 #		if current == 1:
@@ -119,12 +119,12 @@ def start(song):
 		output.setformat(aa.PCM_FORMAT_S32_LE)
 	else:
 		raise ValueError('Unsupported format')
-	print "Processing....."
+	#print "Processing....."
 
 	data = wavfile.readframes(chunk)
 	while data!='':
 		if stop is True:
-			print "dying"
+			#print "dying"
 			break;
 		processData(data)
 		data = wavfile.readframes(chunk)
@@ -162,43 +162,49 @@ def changeColor(amplitude):
 #	for pixel in color:
 #		if pixel == 0:
 #			pixel = randint(0,255);
-	if color[0] > 128:
-		while (color[1] + color[2]) < 128:
-			color[1] = randint(0,255)
-			color[2] = randint(0,255)
-
+#	if color[0] > 128:
+#		while (color[1] + color[2]) < 128:
+#			color[1] = randint(0,255)
+#			color[2] = randint(0,255)
+#
 	currentColor = color
-	print color
+	#print color
 	lightRGB((color[0]/255.0)*amplitude,(color[1]/255.0)*amplitude,(color[2]/255.0)*amplitude)
 def stopMusic():
 	global stop
 	stop = True
 
 def processData(data):
+	global out
         channel_l=audioop.tomono(data, 2, 1.0, 0.0)
         channel_r=audioop.tomono(data, 2, 0.0, 1.0)
         max_vol_factor =32.5
         max_l = audioop.max(channel_l,2)/max_vol_factor
         max_r = audioop.max(channel_r,2)/max_vol_factor
         vol = int((max_l + max_r)/2)
+	print vol
         if vol == 0:
                 return
-        dev.play(data)
-	lightLED(vol)
+	else:
+		#out.write(data)
+		Thread(target = out.write, args =(data,)).start()
+		lightLED(vol)
 
 def loopAirPlay():
-        f = open(Config.get('AirPlay','AirPlayPipe'))
         while (True):
-                data = f.read(1600)
+                data = f.read(17640)
                 if (data == ""):
-                        print data
+                        #print data
                         print "null"
                         f.close()
+			f.open(Config.get('AirPlay','AirPlayPipe'))
                         Thread(target = loopAirPlay).start()
                         break
                 t = Thread(target = processData, args = (data,))
                 t.daemon = True
                 t.start()
+f = open(Config.get('AirPlay','AirPlayPipe'))
+out = open("/aplayOut",'w')
 t = Thread(target = loopAirPlay)
 t.daemon = True
 t.start()
